@@ -30,12 +30,38 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
+    let isMounted = true;
+
     const init = async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
+      if (!user || !isMounted) {
         router.push('/login');
         return;
       }
+
+      // Safe auto-create: only insert if no profile exists
+      const { data: existingProfile, error: checkError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', user.id)
+        .maybeSingle();  // Use maybeSingle to avoid error on no row
+
+      if (checkError) {
+        console.error('Profile check error:', checkError);
+      }
+
+      if (!existingProfile && isMounted) {
+        const { error: insertError } = await supabase
+          .from('profiles')
+          .insert({ id: user.id });
+
+        if (insertError) {
+          console.error('Failed to auto-create profile:', insertError);
+        } else {
+          console.log('Profile auto-created for new user:', user.id);
+        }
+      }
+
       setUser(user);
 
       const { data, error } = await supabase
@@ -53,11 +79,14 @@ export default function Home() {
     init();
 
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-      setUser(session?.user ?? null);
-      if (!session?.user) router.push('/login');
+      if (isMounted) setUser(session?.user ?? null);
+      if (!session?.user && isMounted) router.push('/login');
     });
 
-    return () => authListener.subscription.unsubscribe();
+    return () => {
+      isMounted = false;
+      authListener.subscription.unsubscribe();
+    };
   }, [router]);
 
   const isVideoUrl = (url: string) => /\.(mp4|webm|ogg|mov|m4v)$/i.test(url);
@@ -112,6 +141,7 @@ export default function Home() {
 
     if (error) {
       setUploadStatus('Insert failed: ' + error.message);
+      console.error('Insert error:', error);
     } else {
       setUploadStatus('✅ Entry added successfully!');
 
@@ -152,7 +182,7 @@ export default function Home() {
         )}
       </div>
 
-      {/* Spotify Test Section (unchanged) */}
+      {/* Spotify Test Section */}
       <div className="max-w-4xl mx-auto mb-16 bg-gray-900 p-8 rounded-xl border border-gray-700">
         <h2 className="text-3xl font-semibold mb-6">Spotify (Test Mode)</h2>
         {spotifyConnected ? (
@@ -165,7 +195,6 @@ export default function Home() {
         )}
       </div>
 
-      {/* Upload Form (unchanged from working version) */}
       {user && (
         <div className="max-w-4xl mx-auto bg-gray-900 p-8 rounded-xl border border-gray-700 mb-12">
           <h3 className="text-2xl font-semibold mb-6">Add New Memory</h3>
@@ -201,7 +230,6 @@ export default function Home() {
         </div>
       )}
 
-      {/* Timeline Display (unchanged) */}
       <div className="max-w-4xl mx-auto">
         <h2 className="text-4xl font-bold mb-8 text-center">Your Life Timeline</h2>
         {timeline.length === 0 ? (
