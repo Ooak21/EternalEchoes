@@ -126,7 +126,7 @@ export default function Home() {
       const fileName = `${user.id}/${Date.now()}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
-        .from('timeline-media').upload(fileName, uploadFile);
+        .from('timeline-media').upload(fileName, uploadFile!);
 
       if (uploadError) {
         setUploadStatus('Upload failed: ' + uploadError.message);
