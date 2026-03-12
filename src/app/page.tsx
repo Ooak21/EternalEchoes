@@ -403,7 +403,7 @@ export default function Home() {
               <button
                 onClick={() => setSpotifyConnected(true)}
                 style={{
-                  background: '#1DB954', color: '#000', border: 'none',
+                  background: '#c9a96e', color: '#0c0c0b', border: 'none',
                   padding: '11px 24px', fontSize: '11px', fontWeight: 500,
                   letterSpacing: '0.1em', textTransform: 'uppercase',
                   cursor: 'pointer', fontFamily: 'DM Sans, sans-serif',
@@ -562,7 +562,7 @@ export default function Home() {
                     Photo / Video&nbsp;
                     <span style={{ color: '#282825', textTransform: 'none', letterSpacing: 0, fontSize: '11px' }}>max 10MB image · 150MB video</span>
                   </label>
-                  <input type="file" accept="image/*,video/*" onChange={(e) => setFile(e.target.files?.[0] || null)} className="field-input" style={{ cursor: 'pointer' }} />
+                  <input type="file" accept="image/*,video/*" onChange={(e) => setFile(e.target.files?.[0] || null)} className="field-input" style={{ cursor: 'pointer', paddingTop: '11px', paddingBottom: '11px', color: '#555550' }} />
                   {file && (
                     <p style={{ fontSize: '11px', color: '#3a3a37', marginTop: '6px' }}>
                       {file.name} · {(file.size / 1024 / 1024).toFixed(1)}MB
