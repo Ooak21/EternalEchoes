@@ -122,7 +122,7 @@ export default function Home() {
         } catch { uploadFile = file; }
       }
 
-      const fileExt = uploadFile.name.split('.').pop() ?? 'bin';
+      const fileExt = uploadFile!.name.split('.').pop() ?? 'bin';
       const fileName = `${user.id}/${Date.now()}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
